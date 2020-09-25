@@ -28,6 +28,6 @@ Options:
 Example:
 `python fraserQC.py -f -C 5 -i test_1.fq.gz,test_2.fq.gz -t 2 -s test -o outdir`
 
-Dependencies
+Dependencies:
 - FastQC (https://www.bioinformatics.babraham.ac.uk/projects/fastqc/)
 - htqc (https://sourceforge.net/projects/htqc/)
