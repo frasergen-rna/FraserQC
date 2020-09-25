@@ -9,4 +9,5 @@ Usage:
 
 
 Required input are:
+
 1.Compressed file of fastq
