@@ -33,5 +33,5 @@ Example:
 
 ## How to use this tool:
 1. Install FastQC, htqc and R
-2. Modify fraserQC.py with the install path of FastQC and htqc. Specifically modify the script at line 412 and 416
+2. Modify fraserQC.py with the install path of FastQC and htqc. Specifically modify the script at line 417 and 421
 
