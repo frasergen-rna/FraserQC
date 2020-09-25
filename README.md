@@ -19,7 +19,6 @@ Options:
     -m, --watermarker                       print out water marker [default to not print water marker]
 
   Advanced Options:
-    Parameters for htqc
 
     -w INT              window size for quality trim [default: 5]
     -C INT              quality threshold for trim [default: 20]
@@ -31,3 +30,4 @@ Example:
 Dependencies:
 - FastQC (https://www.bioinformatics.babraham.ac.uk/projects/fastqc/)
 - htqc (https://sourceforge.net/projects/htqc/)
+
