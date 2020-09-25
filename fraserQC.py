@@ -341,7 +341,7 @@ def checkRequiredArguments(opts, parser):
 ##################parameters and help information
 usage = '\n python %prog [options] -i fastqFile -s sampleName -o outputFolder'
 
-parser = OptionParser(usage, version='%prog 1.0 by shijun xiao at 20170413')
+parser = OptionParser(usage, version='%prog 1.0')
 
 ##parameters for sampleName
 parser.add_option('-s','--sampleName',
@@ -392,11 +392,11 @@ else:
 ################modify this part for program path
 progDict={
 "scriptPath": os.path.join(sys.path[0], "scripts"),
-"fastqc": os.path.join(sys.path[0], "../../../software/FastQC/fastqc"),
-"htTrim": os.path.join(sys.path[0], "../../../software/htqc-0.90.8-Source/bin/ht-trim"),
-"htFilter": os.path.join(sys.path[0], "../../../software/htqc-0.90.8-Source/bin/ht-filter"),
-"htStat": os.path.join(sys.path[0], "../../../software/htqc-0.90.8-Source/bin/ht-stat"),
-"Rscript": os.path.join(sys.path[0],"../../../software/anaconda2/bin/Rscript"),
+"fastqc": os.path.join(sys.path[0], "/FastQC/fastqc"),
+"htTrim": os.path.join(sys.path[0], "/htqc-0.90.8-Source/bin/ht-trim"),
+"htFilter": os.path.join(sys.path[0], "/htqc-0.90.8-Source/bin/ht-filter"),
+"htStat": os.path.join(sys.path[0], "/htqc-0.90.8-Source/bin/ht-stat"),
+"Rscript": os.path.join(sys.path[0],"/anaconda2/bin/Rscript"),
 }
 
 ################check programs are executable
