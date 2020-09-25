@@ -279,37 +279,42 @@ def htqc_run(sampleName, fileList, htqc_W, htqc_C, htqc_L):
 		else:
 			if fileType == "gz":
 				cmd = progDict["htTrim"] + " -q -i " + fastq1 + " -z -S both -C " + str(htqc_C) + " -W " + str(htqc_W) + " -o " + fastq1.split('/')[-1] + "_Q" + str(htqc_C) + ".fastq.gz"
-				print "Performing command 1: " + cmd
+				#print "Performing command 1: " + cmd
 				os.system(cmd)
 
 				cmd = progDict["htTrim"] + " -q -i " + fastq2 + " -z -S both -C " + str(htqc_C) + " -W " + str(htqc_W) + " -o " + fastq2.split('/')[-1] + "_Q" + str(htqc_C) + ".fastq.gz"
-				print "Performing command 1: " + cmd
+				#print "Performing command 1: " + cmd
 				os.system(cmd)
 
-				#cmd = progDict["htFilter"] + " -q -i " + fastq1.split('/')[-1] + "_Q" + str(htqc_C) + ".fastq.gz " + fastq2.split('/')[-1] + "_Q" + str(htqc_C) + ".fastq.gz -z -P -F length -L " + str(htqc_L) + " -o " + sampleName +"_Q" + str(htqc_C) + "L" + str(htqc_L) + ""
-				cmd = progDict["htFilter"] + " -q -i " + fastq1.split('/')[-1] + "_Q" + str(htqc_C) + ".fastq.gz " + fastq2.split('/')[-1] + "_Q" + str(htqc_C) + ".fastq.gz -z -P -F length quality -Q " + str(htqc_C) + " -L " + str(htqc_L) + " -o " + sampleName +"_Q" + str(htqc_C) + "L" + str(htqc_L) + ""
-				print "Performing command 1: " + cmd
+				cmd = progDict["htFilter"] + " -q -i " + fastq1.split('/')[-1] + "_Q" + str(htqc_C) + ".fastq.gz " + fastq2.split('/')[-1] + "_Q" + str(htqc_C) + ".fastq.gz -z -P -F quality " + str(htqc_C) + " -L " + str(htqc_L) + " -o temp" + sampleName +"_Q" + str(htqc_C) + "L" + str(htqc_L) + ""
+				os.system(cmd)
+				#print "Performing command 1: " + cmd
+				cmd = progDict["htFilter"] + " -q -i temp" + sampleName +"_Q" + str(htqc_C) + "L" + str(htqc_L) + "_1.fastq.gz temp" + sampleName +"_Q" + str(htqc_C) + "L" + str(htqc_L) + "_2.fastq.gz -z -P -F length -L " + str(htqc_L) + " -o " + sampleName +"_Q" + str(htqc_C) + "L" + str(htqc_L) + ""
+				#print "Performing command 1: " + cmd
 				os.system(cmd)
 
 				cmd = "rm " + fastq1.split('/')[-1]+"_Q" + str(htqc_C) + ".fastq.gz; rm " + fastq2.split('/')[-1]+"_Q" + str(htqc_C) + ".fastq.gz"
-				print "Performing command: " + cmd
-				#os.system(cmd)	
+				os.system(cmd)	
+				cmd = "rm temp" + sampleName +"_Q" + str(htqc_C) + "L" + str(htqc_L) + "_1.fastq.gz temp" + sampleName +"_Q" + str(htqc_C) + "L" + str(htqc_L) + "_2.fastq.gz"
+				os.system(cmd)	
 			
 			elif fileType == "fastq" or fileType == "fq":
 				cmd = progDict["htTrim"] + " -q -i " + fastq1 + " -S both -C " + str(htqc_C) + " -W " + str(htqc_W) + " -o " + fastq1.split('/')[-1] + "_Q" + str(htqc_C) + ".fastq"
-				print "Performing command 2: " + cmd #print cmd
+				#print "Performing command 2: " + cmd #print cmd
 				os.system(cmd)
 
 				cmd = progDict["htTrim"] + " -q -i " + fastq2 + " -S both -C " + str(htqc_C) + " -W " + str(htqc_W) + " -o " + fastq2.split('/')[-1] + "_Q" + str(htqc_C) + ".fastq"
-				print "Performing command 2: " + cmd #print cmd
+				#print "Performing command 2: " + cmd #print cmd
 				os.system(cmd)
 
-				cmd = progDict["htFilter"] + " -q -i " + fastq1.split('/')[-1] + "_Q" + str(htqc_C) + ".fastq " + fastq2.split('/')[-1] + "_Q" + str(htqc_C) + ".fastq -P -F length -L " + str(htqc_L) + " -o " + sampleName +"_Q" + str(htqc_C) + "L" + str(htqc_L) + ""     
-				print "Performing command 2: " + cmd #print cmd
+				cmd = progDict["htFilter"] + " -q -i " + fastq1.split('/')[-1] + "_Q" + str(htqc_C) + ".fastq " + fastq2.split('/')[-1] + "_Q" + str(htqc_C) + ".fastq -P -F length -L " + str(htqc_L) + " -o temp" + sampleName +"_Q" + str(htqc_C) + "L" + str(htqc_L) + ""     
+				#print "Performing command 2: " + cmd #print cmd
 				os.system(cmd)
+				cmd = progDict["htFilter"] + " -q -i temp" + sampleName +"_Q" + str(htqc_C) + "L" + str(htqc_L) + "_1.fastq temp" + sampleName +"_Q" + str(htqc_C) + "L" + str(htqc_L) + "_2.fastq -z -P -F length -L " + str(htqc_L) + " -o " + sampleName +"_Q" + str(htqc_C) + "L" + str(htqc_L) + ""
 
-				cmd = "rm " + fastq1.split('/')[-1] + "_Q" + str(htqc_C) + ".fastq; rm " + fastq2.split('/')[-1] +"_Q" + str(htqc_C) + ".fastq"
-				print "Performing command 2: " + cmd #print cmd
+				cmd = "rm " + fastq1.split('/')[-1] + "_Q" + str(htqc_C) + ".fastq; rm " + fastq2.split('/')[-1] +"_Q" + str(htqc_C) + ".fastq"			
+				os.system(cmd)
+				cmd = "rm temp" + sampleName +"_Q" + str(htqc_C) + "L" + str(htqc_L) + "_1.fastq temp" + sampleName +"_Q" + str(htqc_C) + "L" + str(htqc_L) + "_2.fastq"
 				os.system(cmd)
 
 			else:
@@ -318,27 +323,27 @@ def htqc_run(sampleName, fileList, htqc_W, htqc_C, htqc_L):
 		fastq1 = fileList[0]
 		if fileType == "gz":
 			cmd = progDict["htTrim"] + " -q -i " + fastq1 + " -z -S both -C " + str(htqc_C) + " -W " + str(htqc_W) + " -o " + fastq1.split('/')[-1] + "_Q" + str(htqc_C) + ".fastq.gz"
-			print "Performing command 3: " + cmd
+			#print "Performing command 3: " + cmd
 			os.system(cmd)
 
 			cmd = progDict["htFilter"] + " -q -i " + fastq1.split('/')[-1] + "_Q" + str(htqc_C) + ".fastq.gz -z -S -F length -L " + str(htqc_L) + " -o " + sampleName +"_Q" + str(htqc_C) + "L" + str(htqc_L) + ""
-			print "Performing command 3: " + cmd
+			#print "Performing command 3: " + cmd
 			os.system(cmd)
 
 			cmd = "rm " + fastq1.split('/')[-1] + "_Q" + str(htqc_C) + ".fastq.gz"
-			print "Performing command 3: " + cmd
+			#print "Performing command 3: " + cmd
 			os.system(cmd)
 		
 		elif fileType == "fastq" or fileType == "fq":
 			cmd = progDict["htTrim"] + " -q -i " + fastq1 + " -S both -C " + str(htqc_C) + " -W " + str(htqc_W) + " -o " + fastq1.split('/')[-1] + "_Q" + str(htqc_C) + ".fastq"
-			print "Performing command 4: " + cmd
+			#print "Performing command 4: " + cmd
 			os.system(cmd)
 
 			cmd = progDict["htFilter"] + " -q -i " + fastq1.split('/')[-1] + "_Q" + str(htqc_C) + ".fastq -S -F length -L " + str(htqc_L) + " -o " + sampleName +"_Q" + str(htqc_C) + "L" + str(htqc_L) + ""     
-			print "Performing command 4: " + cmd
+			#print "Performing command 4: " + cmd
 			os.system(cmd)
 			cmd = "rm " + fastq1.split('/')[-1] + "_Q" + str(htqc_C) + ".fastq"
-			print "Performing command 4: " + cmd
+			#print "Performing command 4: " + cmd
 			os.system(cmd)
 
 		else:
