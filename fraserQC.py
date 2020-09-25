@@ -1,7 +1,7 @@
 #!/usr/bin/python
 #-*-coding:utf-8-*- 
 
-#fraserQC for fastq data quality control and trim 
+#fraserQC for fastq data quality control and trim
 #frasergen reserved all right regrading to the pipelines
 
 import sys
@@ -31,7 +31,7 @@ def create_folder(folder):
 def fastqc_run(sampleName, fileList, outputFolder, threads):
 	#clean output files
 	rm_folder(sampleName+"_fastqc")
-        rm_folder(sampleName+"_htqc")
+	rm_folder(sampleName+"_htqc")
 
 	fileType = fileList[0].split('.')[-1]
 	statDict = {"readNum":" ", "baseNum":" ", "readLen":" ", "Q20Rate":" ", "Q30Rate":" ", "GCRate":" ", "passOverRepTest":" "}
@@ -70,7 +70,7 @@ def fastqc_run(sampleName, fileList, outputFolder, threads):
 	for fqFile in fileList:
 		cmd = progDict["fastqc"] + " -t " + str(threads) + " -q " + fqFile +" -o "+sampleName+"_fastqc"
 		#cmd = progDict["fastqc"] + " -t " + str(threads) + " " + fqFile +" -o "+sampleName+"_fastqc"	
-		#print(cmd)
+		print "Performing command: " + cmd
 		os.system(cmd)
 
 	#collect fastqc result
@@ -80,10 +80,13 @@ def fastqc_run(sampleName, fileList, outputFolder, threads):
 		###modified by liuzhenhua 20180529
 		if "fastq.gz" in fileList[i-1]:
 			zipFile = fileList[i-1].split('/')[-1].split('.fastq')[0]
+		elif "fastq" in fileList[i-1]:
+			zipFile = fileList[i-1].split('/')[-1].split('.fastq')[0]
 		else:
 			zipFile = fileList[i-1].split('/')[-1].split('.fq')[0]
 		#print zipFile
 		cmd = "unzip -q "+sampleName+"_fastqc/"+zipFile+"_fastqc.zip -d "+sampleName+"_fastqc/"
+		print "Performing command: " + cmd
 		os.system(cmd)
 
 		#############################################################parse fastqc output
@@ -142,6 +145,7 @@ def fastqc_run(sampleName, fileList, outputFolder, threads):
 		FastqcOut.close()
 	
 		cmd="cp "+sampleName+"_fastqc/"+zipFile+"_fastqc/fastqc_data.txt "+outputFolder+"/"+sampleName+"/fastqc_data_"+str(i)+".txt"
+		print "Performing command: " + cmd
 		os.system(cmd)
 
         #htqc run
@@ -155,7 +159,8 @@ def fastqc_run(sampleName, fileList, outputFolder, threads):
                         cmd = progDict["htStat"] + " -q -z -i " +  ' '.join(fileList) + " -P -o " + sampleName + "_htqc"
                 else:
                         cmd = progDict["htStat"] + " -q -i " +  ' '.join(fileList) + " -P -o " + sampleName + "_htqc"
-	print cmd
+		print "Performing htstat ..."
+		print "Performing command: " + cmd
         os.system(cmd)
 
 	#collect htqc results
@@ -264,42 +269,47 @@ def htqc_run(sampleName, fileList, htqc_W, htqc_C, htqc_L):
 
 	#quality trim for data according to PE or SE
 	fileType = fileList[0].split('.')[-1]
-
+	print "PE = ", PE
+	print "File list = ", fileList
 	if PE == 1:
 		fastq1 = fileList[0]
 		fastq2 = fileList[1]
-
 		if fastq1.split('.')[-1] != fastq2.split('.')[-1]: 
 			print "unconsistent file type for two reads", fastq1, fastq2
 		else:
 			if fileType == "gz":
 				cmd = progDict["htTrim"] + " -q -i " + fastq1 + " -z -S both -C " + str(htqc_C) + " -W " + str(htqc_W) + " -o " + fastq1.split('/')[-1] + "_Q" + str(htqc_C) + ".fastq.gz"
-				#print cmd
+				print "Performing command 1: " + cmd
 				os.system(cmd)
 
 				cmd = progDict["htTrim"] + " -q -i " + fastq2 + " -z -S both -C " + str(htqc_C) + " -W " + str(htqc_W) + " -o " + fastq2.split('/')[-1] + "_Q" + str(htqc_C) + ".fastq.gz"
+				print "Performing command 1: " + cmd
 				os.system(cmd)
 
-				cmd = progDict["htFilter"] + " -q -i " + fastq1.split('/')[-1] + "_Q" + str(htqc_C) + ".fastq.gz " + fastq2.split('/')[-1] + "_Q" + str(htqc_C) + ".fastq.gz -z -P -F length -L " + str(htqc_L) + " -o " + sampleName +"_Q" + str(htqc_C) + "L" + str(htqc_L) + ""
+				#cmd = progDict["htFilter"] + " -q -i " + fastq1.split('/')[-1] + "_Q" + str(htqc_C) + ".fastq.gz " + fastq2.split('/')[-1] + "_Q" + str(htqc_C) + ".fastq.gz -z -P -F length -L " + str(htqc_L) + " -o " + sampleName +"_Q" + str(htqc_C) + "L" + str(htqc_L) + ""
+				cmd = progDict["htFilter"] + " -q -i " + fastq1.split('/')[-1] + "_Q" + str(htqc_C) + ".fastq.gz " + fastq2.split('/')[-1] + "_Q" + str(htqc_C) + ".fastq.gz -z -P -F length quality -Q " + str(htqc_C) + " -L " + str(htqc_L) + " -o " + sampleName +"_Q" + str(htqc_C) + "L" + str(htqc_L) + ""
+				print "Performing command 1: " + cmd
 				os.system(cmd)
 
 				cmd = "rm " + fastq1.split('/')[-1]+"_Q" + str(htqc_C) + ".fastq.gz; rm " + fastq2.split('/')[-1]+"_Q" + str(htqc_C) + ".fastq.gz"
-				os.system(cmd)	
+				print "Performing command: " + cmd
+				#os.system(cmd)	
 			
 			elif fileType == "fastq" or fileType == "fq":
-                        	cmd = progDict["htTrim"] + " -q -i " + fastq1 + " -S both -C " + str(htqc_C) + " -W " + str(htqc_W) + " -o " + fastq1.split('/')[-1] + "_Q" + str(htqc_C) + ".fastq"
-				#print cmd
-                        	os.system(cmd)
+				cmd = progDict["htTrim"] + " -q -i " + fastq1 + " -S both -C " + str(htqc_C) + " -W " + str(htqc_W) + " -o " + fastq1.split('/')[-1] + "_Q" + str(htqc_C) + ".fastq"
+				print "Performing command 2: " + cmd #print cmd
+				os.system(cmd)
 
-                        	cmd = progDict["htTrim"] + " -q -i " + fastq2 + " -S both -C " + str(htqc_C) + " -W " + str(htqc_W) + " -o " + fastq2.split('/')[-1] + "_Q" + str(htqc_C) + ".fastq"
-				#print cmd
-                        	os.system(cmd)
+				cmd = progDict["htTrim"] + " -q -i " + fastq2 + " -S both -C " + str(htqc_C) + " -W " + str(htqc_W) + " -o " + fastq2.split('/')[-1] + "_Q" + str(htqc_C) + ".fastq"
+				print "Performing command 2: " + cmd #print cmd
+				os.system(cmd)
 
-                        	cmd = progDict["htFilter"] + " -q -i " + fastq1.split('/')[-1] + "_Q" + str(htqc_C) + ".fastq " + fastq2.split('/')[-1] + "_Q" + str(htqc_C) + ".fastq -P -F length -L " + str(htqc_L) + " -o " + sampleName +"_Q" + str(htqc_C) + "L" + str(htqc_L) + ""     
-				#print cmd
-                        	os.system(cmd)
+				cmd = progDict["htFilter"] + " -q -i " + fastq1.split('/')[-1] + "_Q" + str(htqc_C) + ".fastq " + fastq2.split('/')[-1] + "_Q" + str(htqc_C) + ".fastq -P -F length -L " + str(htqc_L) + " -o " + sampleName +"_Q" + str(htqc_C) + "L" + str(htqc_L) + ""     
+				print "Performing command 2: " + cmd #print cmd
+				os.system(cmd)
 
 				cmd = "rm " + fastq1.split('/')[-1] + "_Q" + str(htqc_C) + ".fastq; rm " + fastq2.split('/')[-1] +"_Q" + str(htqc_C) + ".fastq"
+				print "Performing command 2: " + cmd #print cmd
 				os.system(cmd)
 
 			else:
@@ -307,25 +317,32 @@ def htqc_run(sampleName, fileList, htqc_W, htqc_C, htqc_L):
 	else:
 		fastq1 = fileList[0]
 		if fileType == "gz":
-       	        	cmd = progDict["htTrim"] + " -q -i " + fastq1 + " -z -S both -C " + str(htqc_C) + " -W " + str(htqc_W) + " -o " + fastq1.split('/')[-1] + "_Q" + str(htqc_C) + ".fastq.gz"
-                	os.system(cmd)
+			cmd = progDict["htTrim"] + " -q -i " + fastq1 + " -z -S both -C " + str(htqc_C) + " -W " + str(htqc_W) + " -o " + fastq1.split('/')[-1] + "_Q" + str(htqc_C) + ".fastq.gz"
+			print "Performing command 3: " + cmd
+			os.system(cmd)
 
-                	cmd = progDict["htFilter"] + " -q -i " + fastq1.split('/')[-1] + "_Q" + str(htqc_C) + ".fastq.gz -z -S -F length -L " + str(htqc_L) + " -o " + sampleName +"_Q" + str(htqc_C) + "L" + str(htqc_L) + ""
-                	os.system(cmd)
+			cmd = progDict["htFilter"] + " -q -i " + fastq1.split('/')[-1] + "_Q" + str(htqc_C) + ".fastq.gz -z -S -F length -L " + str(htqc_L) + " -o " + sampleName +"_Q" + str(htqc_C) + "L" + str(htqc_L) + ""
+			print "Performing command 3: " + cmd
+			os.system(cmd)
+
 			cmd = "rm " + fastq1.split('/')[-1] + "_Q" + str(htqc_C) + ".fastq.gz"
+			print "Performing command 3: " + cmd
 			os.system(cmd)
 		
-        	elif fileType == "fastq" or fileType == "fq":
-                	cmd = progDict["htTrim"] + " -q -i " + fastq1 + " -S both -C " + str(htqc_C) + " -W " + str(htqc_W) + " -o " + fastq1.split('/')[-1] + "_Q" + str(htqc_C) + ".fastq"
-                	os.system(cmd)
-
-                	cmd = progDict["htFilter"] + " -q -i " + fastq1.split('/')[-1] + "_Q" + str(htqc_C) + ".fastq -S -F length -L " + str(htqc_L) + " -o " + sampleName +"_Q" + str(htqc_C) + "L" + str(htqc_L) + ""     
-                	os.system(cmd)
-			cmd = "rm " + fastq1.split('/')[-1] + "_Q" + str(htqc_C) + ".fastq"
+		elif fileType == "fastq" or fileType == "fq":
+			cmd = progDict["htTrim"] + " -q -i " + fastq1 + " -S both -C " + str(htqc_C) + " -W " + str(htqc_W) + " -o " + fastq1.split('/')[-1] + "_Q" + str(htqc_C) + ".fastq"
+			print "Performing command 4: " + cmd
 			os.system(cmd)
 
-        	else:
-                	print "unrecognized format of " + fastq1.split('.')[-1] + " for raw data for sample " + sampleName
+			cmd = progDict["htFilter"] + " -q -i " + fastq1.split('/')[-1] + "_Q" + str(htqc_C) + ".fastq -S -F length -L " + str(htqc_L) + " -o " + sampleName +"_Q" + str(htqc_C) + "L" + str(htqc_L) + ""     
+			print "Performing command 4: " + cmd
+			os.system(cmd)
+			cmd = "rm " + fastq1.split('/')[-1] + "_Q" + str(htqc_C) + ".fastq"
+			print "Performing command 4: " + cmd
+			os.system(cmd)
+
+		else:
+			print "unrecognized format of " + fastq1.split('.')[-1] + " for raw data for sample " + sampleName
 
 
 #check all required arguments were supplied	
@@ -341,7 +358,7 @@ def checkRequiredArguments(opts, parser):
 ##################parameters and help information
 usage = '\n python %prog [options] -i fastqFile -s sampleName -o outputFolder'
 
-parser = OptionParser(usage, version='%prog 1.0')
+parser = OptionParser(usage, version='%prog 1.0 by shijun xiao at 20170413')
 
 ##parameters for sampleName
 parser.add_option('-s','--sampleName',
@@ -389,14 +406,14 @@ else:
 	checkRequiredArguments(options, parser)
 	
 
-################modify this part for program path
+################ modify this part for program path
 progDict={
 "scriptPath": os.path.join(sys.path[0], "scripts"),
-"fastqc": os.path.join(sys.path[0], "/FastQC/fastqc"),
-"htTrim": os.path.join(sys.path[0], "/htqc-0.90.8-Source/bin/ht-trim"),
-"htFilter": os.path.join(sys.path[0], "/htqc-0.90.8-Source/bin/ht-filter"),
-"htStat": os.path.join(sys.path[0], "/htqc-0.90.8-Source/bin/ht-stat"),
-"Rscript": os.path.join(sys.path[0],"/anaconda2/bin/Rscript"),
+"fastqc": "/local_data1/pipeline/Transcriptome/PB_Isoseq_noref_V1.0/software/FastQC/fastqc",
+"htTrim": "/local_data1/pipeline/Transcriptome/PB_Isoseq_noref_V1.0/software/htqc-0.90.8-Source/bin/ht-trim",
+"htFilter": "/local_data1/pipeline/Transcriptome/PB_Isoseq_noref_V1.0/software/htqc-0.90.8-Source/bin/ht-filter",
+"htStat": "/local_data1/pipeline/Transcriptome/PB_Isoseq_noref_V1.0/software/htqc-0.90.8-Source/bin/ht-stat",
+"Rscript": "/local_data1/pipeline/Transcriptome/PB_Isoseq_noref_V1.0/software/anaconda2/bin/Rscript",
 }
 
 ################check programs are executable
@@ -428,7 +445,7 @@ create_folder(outputFolder)
 #check if all fastq files were there
 print "#############################\nchecking fastq data ..."
 fileList = fqList.split(",")
-
+print "Input File List: ", fileList
 for fq in fileList:
 	if not os.path.isfile(fq):
 		print "Cannot find fastq file", fq
@@ -442,21 +459,26 @@ if len(fileList) == 2:
 
 fastqc_run(sampleName, fileList, outputFolder, options.threads)	
 qc_plot(sampleName, fileList, outputFolder, water)
-
+#print "File list after fqstqc_run and qc_plot", fileList
 #perform quality trim and quality control again if needed
 if options.filter:
 	rm_flag = 0
 
 	#load in sample info
 	fileList = fqList.split(",")
-
+	#print "File List for htqc_run: ", fileList
+	#print "Threads = ===", options.threads, "^^^"
 	#non-parallel mode
 	if options.threads == 1:
-		htqc_run(sampleName, fileList, htqc_W, htqc_C, htqc_L)	
-		
-
+		print "Running ht_qc with single process"
+		htqc_run(sampleName, fileList, htqc_W, htqc_C, htqc_L)
+	else:
+		print "number of threads should be large than zero."
+		sys.exit(1)
 	#parallel mode
+	"""
 	elif options.threads > 1:
+		print "Running ht_qc with multiple process"
 		#if the file is compressed, extract fastq file and split into small parts
 		rm_flag = 0
 		if fileList[0].split('.')[-1] == "gz":
@@ -518,32 +540,30 @@ if options.filter:
 		else:
 			print "no or more than two fastq files for sample", sampleName
 			sys.exit(1)
+	"""
 
-	else:
-                print "number of threads should be large than zero."
-                sys.exit(1)
 
 	#generate fileList for trimed fastq files
 	fqTrimList = ""
-        if len(fileList) == 2:
+	if len(fileList) == 2:
 		if fileList[0].split('.')[-1] == "gz" and options.threads == 1:
-                	fqTrimList=CWD+'/'+sampleName +"_Q" + str(htqc_C) + "L" + str(htqc_L) + "_1.fastq.gz,"+CWD+'/'+sampleName +"_Q" + str(htqc_C) + "L" + str(htqc_L) + "_2.fastq.gz"
+			fqTrimList=CWD+'/'+sampleName +"_Q" + str(htqc_C) + "L" + str(htqc_L) + "_1.fastq.gz,"+CWD+'/'+sampleName +"_Q" + str(htqc_C) + "L" + str(htqc_L) + "_2.fastq.gz"
 		else:
 			fqTrimList=CWD+'/'+sampleName +"_Q" + str(htqc_C) + "L" + str(htqc_L) + "_1.fastq,"+CWD+'/'+sampleName +"_Q" + str(htqc_C) + "L" + str(htqc_L) + "_2.fastq"
 
-        elif len(fileList) == 1:
+	elif len(fileList) == 1:
 		if fileList[0].split('.')[-1] == "gz" and options.threads == 1:
 			fqTrimList=CWD+'/'+sampleName +"_Q" + str(htqc_C) + "L" + str(htqc_L) + ".fastq.gz"
 		else:
-                	fqTrimList=CWD+'/'+sampleName +"_Q" + str(htqc_C) + "L" + str(htqc_L) + ".fastq"
-        else:
-                print "no or more than two fastq files for sample", sampleName
-                sys.exit(1)
+			fqTrimList=CWD+'/'+sampleName +"_Q" + str(htqc_C) + "L" + str(htqc_L) + ".fastq"
+	else:
+		print "no or more than two fastq files for sample", sampleName
+		sys.exit(1)
 	#print fqTrimList	
 
 	#load in trimed sample file for quality control
-        fileList = fqTrimList.split(",")
-
+	fileList = fqTrimList.split(",")
+	#print "File List prior to fastqc run after trimming: ", fileList
 	#quality check anagin after triming
-        fastqc_run(sampleName+"_clean", fileList, outputFolder, options.threads)
-        qc_plot(sampleName+"_clean", fileList, outputFolder, water)
+	fastqc_run(sampleName+"_clean", fileList, outputFolder, options.threads)
+	qc_plot(sampleName+"_clean", fileList, outputFolder, water)
